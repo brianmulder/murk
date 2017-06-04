@@ -12,6 +12,7 @@ Welcome to Murk's documentation!
 
    terraform
    sphinx
+   bats
 
 
 Indices and tables
