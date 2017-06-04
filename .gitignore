@@ -1,3 +1,7 @@
 *.zip
 .tmp.*/
 docs/_build
+.envrc
+.terraform
+*.tfstate
+*.tfstate.backup
