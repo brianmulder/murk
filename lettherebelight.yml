@@ -1,0 +1,38 @@
+---
+- hosts: localhost
+  sudo: yes
+  tasks:
+    - name: python-pip
+      yum: name=python-pip state=latest
+    - name: Upgrade pip
+      shell: pip install --upgrade pip
+    - name: AWS CLI
+      shell: pip install awscli --upgrade --user
+    - name: Python 3
+      yum: name=python34-setuptools state=latest
+    - name: pip3
+      shell: easy_install-3.4 pip
+    - name: virtualenv 3
+      shell: pip3 install virtualenv
+    - name: virtualenv
+      shell: pip install virtualenv
+    - name: git
+      yum: name=git state=latest
+    - name: vim
+      yum: name=vim state=latest
+    - name: tmux
+      yum: name=tmux state=latest
+    - name: screen
+      yum: name=screen state=latest
+    - name: dig
+      yum: name=bind-utils state=latest
+    - name: netcat
+      yum: name=nmap-ncat state=latest
+    - name: socat
+      yum: name=socat state=latest
+    - name: tcpdump
+      yum: name=tcpdump state=latest
+    - name: traceroute
+      yum: name=traceroute state=latest
+    - name: nmap
+      yum: name=nmap state=latest

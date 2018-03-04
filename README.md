@@ -2,8 +2,7 @@
 # Prerequisites
 
 ```
-> ./install-hashicorps.sh -v 0.9.6 terraform
-> pip install Sphinx
+> ./install-hashicorps.sh -v 0.11.3 terraform
 ```
 
 # TODO
