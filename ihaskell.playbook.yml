@@ -1,0 +1,49 @@
+---
+- hosts: localhost
+  sudo: yes
+  tasks:
+    - name: pip3
+      apt: name=python3-pip state=latest
+    - name: git
+      apt: name=git state=latest
+    - name: libtinfo-dev
+      apt: name=libtinfo-dev state=latest
+    - name: libzmq3-dev
+      apt: name=libzmq3-dev state=latest
+    - name: libcairo2-dev
+      apt: name=libcairo2-dev state=latest
+    - name: libpango1.0-dev
+      apt: name=libpango1.0-dev state=latest
+    - name: libmagic-dev
+      apt: name=libmagic-dev state=latest
+    - name: libblas-dev
+      apt: name=libblas-dev state=latest
+    - name: liblapack-dev
+      apt: name=liblapack-dev state=latest
+    - name: Install stack
+      shell: curl -sSL https://get.haskellstack.org/ | sh -s - -f
+
+- hosts: localhost
+  sudo: no
+  tasks:
+    - name: Install Ihaskell
+      shell:
+        cmd: git clone --depth=1 https://github.com/gibiansky/IHaskell ihaskell
+        chdir: ~/
+        creates: ~/ihaskell
+    - name: python requirements
+      shell:
+        cmd: pip3 install -r requirements.txt
+        chdir: ~/ihaskell
+    - name: haskell compilation tools
+      shell:
+        cmd: stack install gtk2hs-buildtools
+        chdir: ~/ihaskell
+    - name: local stack install
+      shell:
+        cmd: stack install --fast
+        chdir: ~/ihaskell
+    - name: local ihaskell installation
+      shell:
+        cmd: PATH=/home/ubuntu/.local/bin:$PATH ihaskell install --stack
+        chdir: ~/ihaskell

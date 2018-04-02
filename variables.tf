@@ -23,3 +23,16 @@ variable "aws_amis" {
     ap-southeast-2 = "ami-b6bb47d4"
   }
 }
+
+variable "ubuntu_amis" {
+  default = {
+    ap-southeast-2 = "ami-79915c1b"
+  }
+}
+
+variable "prepared_amis" {
+  default = {
+    ap-southeast-2 = "ami-3a5a9558"
+  }
+}
+
