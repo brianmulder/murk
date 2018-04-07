@@ -11,6 +11,10 @@ Example: ~/.ssh/terraform.pub
 DESCRIPTION
 }
 
+variable "enable_ihaskell_host"     { default = 1 }
+variable "enable_ihaskell_refresh"  { default = 0 }
+variable "enable_docker_build_host" { default = 0 }
+
 variable "aws_region" {
   description = "AWS region to launch servers."
   default     = "ap-southeast-2"
@@ -18,7 +22,7 @@ variable "aws_region" {
 
 # CentOS Linux 7 https://wiki.centos.org/Cloud/AWS
 # Requires subscription, do not be alarmed...
-variable "aws_amis" {
+variable "centos_amis" {
   default = {
     ap-southeast-2 = "ami-b6bb47d4"
   }

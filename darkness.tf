@@ -86,6 +86,7 @@ resource "aws_key_pair" "auth" {
   public_key = "${file(var.public_key_path)}"
 }
 
+# ETA - ~5mins
 resource "aws_instance" "dark" {
   tags {
     Name = "dark"
@@ -100,7 +101,7 @@ resource "aws_instance" "dark" {
   instance_type = "t2.micro"
 
   # Lookup the correct AMI based on the region we specified
-  ami = "${lookup(var.aws_amis, var.aws_region)}"
+  ami = "${lookup(var.centos_amis, var.aws_region)}"
 
   # The name of our SSH keypair we created above.
   key_name = "${aws_key_pair.auth.id}"
@@ -127,6 +128,7 @@ resource "aws_instance" "dark" {
 }
 
 resource "aws_instance" "shine" {
+  count = "${var.enable_ihaskell_host}"
   tags {
     Name = "shine"
   }
@@ -137,30 +139,72 @@ resource "aws_instance" "shine" {
   ami = "${lookup(var.prepared_amis, var.aws_region)}"
 }
 
-# ... instead burn an image from scratch
-#   instance_type = "t2.xlarge"
-#   ami = "${lookup(var.ubuntu_amis, var.aws_region)}"
-#   connection {
-#     type = "ssh"
-#     user = "ubuntu"
-#     host = "${self.private_ip}"
-#     bastion_host = "${aws_instance.dark.public_ip}"
-#     bastion_user = "centos"
-#   }
-#   provisioner "file" {
-#     source = "ihaskell.playbook.yml"
-#     destination = "~/ihaskell.playbook.yml"
-#   }
-#   provisioner "remote-exec" {
-#     inline = [
-#       "sudo apt update",
-#       "sudo apt upgrade -y",
-#       "sudo apt install -y software-properties-common",
-#       "sudo apt-add-repository -y ppa:ansible/ansible",
-#       "sudo apt update",
-#       "sudo apt install -y ansible",
-#       "echo localhost ansible_connection=local | sudo tee --append /etc/ansible/hosts",
-#       "ansible-playbook ~/ihaskell.playbook.yml"
-#     ]
-#   }
-# }
+# ETA - ~3mins
+resource "aws_instance" "bright" {
+  count = "${var.enable_docker_build_host}"
+  tags {
+    Name = "bright"
+  }
+  key_name = "${aws_key_pair.auth.id}"
+  vpc_security_group_ids = ["${aws_security_group.sandbox.id}"]
+  subnet_id = "${aws_subnet.dark.id}"
+  instance_type = "t2.xlarge"
+  ami = "${lookup(var.ubuntu_amis, var.aws_region)}"
+  root_block_device {
+    volume_size = 20
+  }
+  provisioner "remote-exec" {
+    connection {
+      type = "ssh"
+      user = "ubuntu"
+      host = "${self.private_ip}"
+      bastion_host = "${aws_instance.dark.public_ip}"
+      bastion_user = "centos"
+    }
+    # https://docs.docker.com/install/linux/docker-ce/ubuntu
+    inline = [
+      "sudo apt update",
+      "sudo apt upgrade -y",
+      "curl -sSL https://get.haskellstack.org/ | sh -s - -f",
+      "curl -fsSL get.docker.com -o get-docker.sh",
+      "sudo sh get-docker.sh",
+      "sudo usermod -aG docker ubuntu"
+    ]
+  }
+}
+
+# ETA - >1h
+resource "aws_instance" "burn" {
+  count = "${var.enable_ihaskell_refresh}"
+  tags {
+    Name = "burn"
+  }
+  key_name = "${aws_key_pair.auth.id}"
+  vpc_security_group_ids = ["${aws_security_group.sandbox.id}"]
+  subnet_id = "${aws_subnet.dark.id}"
+  instance_type = "t2.xlarge"
+  ami = "${lookup(var.ubuntu_amis, var.aws_region)}"
+  connection {
+   type = "ssh"
+   user = "ubuntu"
+   host = "${self.private_ip}"
+   bastion_host = "${aws_instance.dark.public_ip}"
+   bastion_user = "centos"
+  }
+  provisioner "file" {
+   source = "ihaskell.playbook.yml"
+   destination = "~/ihaskell.playbook.yml"
+  }
+  provisioner "remote-exec" {
+   inline = [
+     "sudo apt update",
+     "sudo apt upgrade -y",
+     "sudo apt install -y software-properties-common",
+     "sudo apt-add-repository -y ppa:ansible/ansible",
+     "sudo apt update",
+     "sudo apt install -y ansible",
+     "echo localhost ansible_connection=local | sudo tee --append /etc/ansible/hosts",
+     "ansible-playbook ~/ihaskell.playbook.yml"
+   ]
+  }
+}
